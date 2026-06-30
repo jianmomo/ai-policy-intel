@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ ops_ui.runs_title }}{% endblock %}
+{% block content %}
+<section class="library-header">
+  <div>
+    <p class="eyebrow">{{ ops_ui.runs_eyebrow }}</p>
+    <h1>{{ ops_ui.runs_heading }}</h1>
+    <p class="section-note">{{ ops_ui.runs_note }}</p>
+    <div class="inline-actions">
+      <a class="text-link" href="/ui/admin/policies?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">Lifecycle Overrides</a>
+      <a class="text-link" href="/ui/admin/sources?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ ops_ui.sources_nav }}</a>
+    </div>
+  </div>
+  <div class="count-card"><span>{{ t('common.hit_count') }}</span><strong>{{ runs | length }}</strong></div>
+</section>
+
+<section class="two-column-grid lower-grid">
+  <section class="panel-card dense">
+    <div class="panel-head"><div><p class="eyebrow">{{ ops_ui.runs_eyebrow }}</p><h2>{{ ops_ui.runs_nav }}</h2></div></div>
+    <div class="stack-list compact">
+      {% for run in runs %}
+      <div class="warning-inline">
+        <div class="badge-row">
+          <span class="state-badge tone-{{ run.tone }}">{{ run.status }}</span>
+          <span class="pill">{{ run.run_type }}</span>
+        </div>
+        <strong>{{ run.created_at | datetime_fmt }}</strong>
+        <p>{{ run.message or t('common.none') }}</p>
+      </div>
+      {% else %}
+      <div class="empty-inline">{{ ops_ui.log_empty }}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel-card dense">
+    <div class="panel-head"><div><p class="eyebrow">{{ ops_ui.runs_eyebrow }}</p><h2>{{ ops_ui.backup_title }}</h2></div></div>
+    <p class="section-note">{{ ops_ui.download_hint }}</p>
+    <div class="stack-list compact">
+      {% for backup in backups %}
+      <div class="mini-row"><div><strong>{{ backup.name }}</strong><p>{{ backup.modified_at | datetime_fmt }} / {{ backup.size_mb }} MB</p></div></div>
+      {% else %}
+      <div class="empty-inline">{{ ops_ui.backup_empty }}</div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+{% endblock %}

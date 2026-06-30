@@ -1,0 +1,12 @@
+[Unit]
+Description=AI Policy Intel Daily Digest Job
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=__PROJECT_DIR__
+Environment=PYTHONUNBUFFERED=1
+Environment=TZ=Asia/Hong_Kong
+EnvironmentFile=-__PROJECT_DIR__/.env
+ExecStart=__PROJECT_DIR__/.venv/bin/python scripts/run_daily.py

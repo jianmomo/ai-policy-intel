@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ t('detail.missing_title') }}{% endblock %}
+{% block content %}
+<section class="empty-state">
+  <p class="eyebrow">{{ t('detail.missing_eyebrow') }}</p>
+  <h1>{{ t('detail.missing_text', item_id=item_id) }}</h1>
+  <a class="primary-link" href="/ui?lang={{ lang }}">{{ t('common.back_home') }}</a>
+</section>
+{% endblock %}

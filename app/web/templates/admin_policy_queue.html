@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}{{ queue_ui.title }}{% endblock %}
+{% block content %}
+<section class="library-header">
+  <div>
+    <p class="eyebrow">{{ queue_ui.eyebrow }}</p>
+    <h1>{{ queue_ui.heading }}</h1>
+    <p class="section-note">{{ queue_ui.note }}</p>
+    <div class="inline-actions">
+      <a class="text-link" href="/ui/admin/policies?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ queue_ui.back_admin }}</a>
+      <a class="text-link" href="/ui/admin/policy-relations?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ relation_ui.nav_label }}</a>
+      <a class="text-link" href="/ui/admin/sources?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ ops_ui.sources_nav }}</a>
+      <a class="text-link" href="/ui/admin/runs?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ ops_ui.runs_nav }}</a>
+    </div>
+  </div>
+  <div class="count-card"><span>{{ queue_ui.window_label }}</span><strong>{{ window }} {{ queue_ui.window_days }}</strong></div>
+</section>
+
+<form class="filter-bar queue-filter" method="get">
+  <input type="hidden" name="lang" value="{{ lang }}" />
+  {% if admin_token %}<input type="hidden" name="admin_token" value="{{ admin_token }}" />{% endif %}
+  <select name="window">
+    <option value="7" {% if window == 7 %}selected{% endif %}>7 {{ queue_ui.window_days }}</option>
+    <option value="14" {% if window == 14 %}selected{% endif %}>14 {{ queue_ui.window_days }}</option>
+    <option value="30" {% if window == 30 %}selected{% endif %}>30 {{ queue_ui.window_days }}</option>
+    <option value="60" {% if window == 60 %}selected{% endif %}>60 {{ queue_ui.window_days }}</option>
+    <option value="90" {% if window == 90 %}selected{% endif %}>90 {{ queue_ui.window_days }}</option>
+  </select>
+  <button type="submit">{{ t('common.search') }}</button>
+</form>
+
+<section class="queue-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ queue_ui.unknown_label }}</p><h2>{{ counts.unknown }}</h2></div></div>
+  <div class="queue-grid">
+    {% for item in unknown_items %}
+    <article class="record-card queue-card">
+      <div class="record-head"><span class="state-badge tone-{{ item.lifecycle.tone }}">{{ item.lifecycle.label }}</span>{% if item.override_enabled %}<span class="summary-chip tone-info">{{ admin_ui.manual_badge }}</span>{% endif %}</div>
+      <h2><a href="{{ item.admin_path }}">{{ item.title }}</a></h2>
+      <p class="record-summary">{{ item.summary or item.reason }}</p>
+      {% if item.policy_audit and item.policy_audit.primary_label %}<div class="summary-chips"><span class="summary-chip tone-{{ item.policy_audit.tone }}">{{ item.policy_audit.primary_label }}</span></div>{% endif %}
+      <div class="record-meta"><span>{{ item.source_name }}</span><span>{{ item.published_at | date_fmt }}</span></div>
+      <a class="text-link" href="{{ item.admin_path }}">{{ queue_ui.open_override }}</a>
+    </article>
+    {% else %}
+    <div class="empty-inline">{{ queue_ui.empty_unknown }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="queue-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ queue_ui.recheck_label }}</p><h2>{{ counts.recheck }}</h2></div></div>
+  <div class="queue-grid">
+    {% for item in recheck_items %}
+    <article class="record-card queue-card">
+      <div class="record-head"><span class="state-badge tone-pending">{{ item.lifecycle.label }}</span><span class="summary-chip tone-neutral">{{ item.last_checked_at | datetime_fmt }}</span></div>
+      <h2><a href="{{ item.admin_path }}">{{ item.title }}</a></h2>
+      <p class="record-summary">{{ item.summary or item.reason }}</p>
+      <div class="record-meta"><span>{{ item.source_name }}</span><span>{{ item.last_checked_at | datetime_fmt }}</span></div>
+      <a class="text-link" href="{{ item.admin_path }}">{{ queue_ui.open_override }}</a>
+    </article>
+    {% else %}
+    <div class="empty-inline">{{ queue_ui.empty_recheck }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="queue-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ queue_ui.expiring_label }}</p><h2>{{ counts.expiring }}</h2></div></div>
+  <div class="queue-grid">
+    {% for item in expiring_items %}
+    <article class="record-card queue-card">
+      <div class="record-head"><span class="state-badge tone-warning">{{ item.lifecycle.label }}</span><span class="summary-chip tone-warning">{{ item.expires_at | date_fmt }}</span></div>
+      <h2><a href="{{ item.admin_path }}">{{ item.title }}</a></h2>
+      <p class="record-summary">{{ item.summary or item.reason }}</p>
+      <div class="record-meta"><span>{{ item.source_name }}</span><span>{{ item.expires_at | date_fmt }}</span></div>
+      <a class="text-link" href="{{ item.admin_path }}">{{ queue_ui.open_override }}</a>
+    </article>
+    {% else %}
+    <div class="empty-inline">{{ queue_ui.empty_expiring }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="queue-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ queue_ui.overdue_label }}</p><h2>{{ counts.overdue }}</h2></div></div>
+  <div class="queue-grid">
+    {% for item in overdue_items %}
+    <article class="record-card queue-card">
+      <div class="record-head"><span class="state-badge tone-warning">{{ item.lifecycle.label }}</span><span class="summary-chip tone-warning">{{ item.expires_at | date_fmt }}</span></div>
+      <h2><a href="{{ item.admin_path }}">{{ item.title }}</a></h2>
+      <p class="record-summary">{{ item.summary or item.reason }}</p>
+      <div class="record-meta"><span>{{ item.source_name }}</span><span>{{ item.expires_at | date_fmt }}</span></div>
+      <a class="text-link" href="{{ item.admin_path }}">{{ queue_ui.open_override }}</a>
+    </article>
+    {% else %}
+    <div class="empty-inline">{{ queue_ui.empty_overdue }}</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

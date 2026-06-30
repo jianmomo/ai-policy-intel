@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }}{{ t('detail.title_suffix') }}{% endblock %}
+{% block content %}
+<section class="detail-layout">
+  <article class="detail-card">
+    <div class="detail-head">
+      <div class="badge-row">
+        {% if item.lifecycle %}<span class="state-badge tone-{{ item.lifecycle.tone }}">{{ item.lifecycle.label }}</span>{% endif %}
+        {% if item.policy_signal %}<span class="state-badge tone-{{ item.policy_signal.tone }}">{{ item.policy_signal.label }}</span>{% else %}<span class="pill">{{ item.category }}</span>{% endif %}
+        {% if item.override_enabled %}<span class="summary-chip tone-info">{{ detail_ui.manual_badge }}</span>{% endif %}
+      </div>
+      <strong>{{ item.score | score_fmt }}</strong>
+    </div>
+    <h1>{{ item.title }}</h1>
+    <p class="detail-summary">{{ item.summary or item.reason }}</p>
+
+    <div class="detail-meta-grid">
+      <div><span>{{ t('detail.source') }}</span><strong>{{ item.source_name }}</strong></div>
+      <div><span>{{ t('detail.category') }}</span><strong>{{ item.category }}</strong></div>
+      <div><span>{{ t('detail.published_at') }}</span><strong>{{ item.published_at | datetime_fmt }}</strong></div>
+      <div><span>{{ t('detail.fetched_at') }}</span><strong>{{ item.fetched_at | datetime_fmt }}</strong></div>
+    </div>
+
+    {% if item.kind == 'policy' %}
+    <section class="detail-section callout-panel">
+      <h2>{{ t('detail.lifecycle') }}</h2>
+      <div class="lifecycle-grid">
+        <div><span>{{ t('detail.effective_at') }}</span><strong>{{ item.effective_at | datetime_fmt }}</strong></div>
+        <div><span>{{ t('detail.expires_at') }}</span><strong>{{ item.expires_at | datetime_fmt }}</strong></div>
+        <div><span>{{ t('detail.status') }}</span><strong>{{ item.lifecycle.label }}</strong></div>
+        <div><span>{{ t('detail.replaced_by') }}</span><strong>{{ item.replaced_by or t('common.none') }}</strong></div>
+        <div><span>{{ t('detail.last_checked_at') }}</span><strong>{{ item.last_checked_at | datetime_fmt }}</strong></div>
+        <div><span>{{ t('detail.status_reason') }}</span><strong>{{ item.status_reason or t('common.unknown') }}</strong></div>
+      </div>
+      {% if item.policy_audit and item.policy_audit.labels %}
+      <div class="source-row"><span>{% if lang == 'zh' %}????{% else %}Auto check{% endif %}</span><strong>{{ item.policy_audit.count }}</strong></div>
+      <div class="summary-chips detail-audit-chips">
+        {% for label in item.policy_audit.labels %}<span class="summary-chip tone-{{ item.policy_audit.tone }}">{{ label }}</span>{% endfor %}
+      </div>
+      {% endif %}
+      <div class="inline-actions">
+        <a class="text-link" href="{{ item.admin_path }}">{{ detail_ui.open_override }}</a>
+        <a class="text-link" href="/ui/sources?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ sources_ui.nav_label }}</a>
+      </div>
+    </section>
+
+    <section class="detail-section">
+      <div class="panel-head"><div><p class="eyebrow">{{ detail_ui.timeline_eyebrow }}</p><h2>{{ detail_ui.timeline_title }}</h2></div></div>
+      <p class="section-note">{{ detail_ui.timeline_note }}</p>
+      <div class="timeline-list">
+        {% for event in policy_timeline %}
+        <div class="timeline-row">
+          <div class="timeline-date">{% if event.at %}{{ event.at | datetime_fmt }}{% else %}{{ detail_ui.unknown_time }}{% endif %}</div>
+          <div class="timeline-copy">
+            <div class="badge-row">
+              <span class="state-badge tone-{{ event.tone }}">{{ event.label }}</span>
+              {% if event.badge %}<span class="pill">{{ event.badge }}</span>{% endif %}
+            </div>
+            <strong>{{ event.title }}</strong>
+            {% if event.note %}<p>{{ event.note }}</p>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <div class="record-tags detail-tags">{% for tag in item.tags %}<span>{{ tag }}</span>{% endfor %}</div>
+
+    <section class="detail-section"><h2>{{ t('detail.reason_heading') }}</h2><p>{{ item.reason }}</p></section>
+
+    <a class="primary-link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ t('common.open') }}</a>
+  </article>
+
+  <aside class="detail-side">
+    {% if item.kind == 'policy' %}
+    <section class="panel-card dense">
+      <div class="panel-head"><div><p class="eyebrow">{{ detail_ui.relation_eyebrow }}</p><h2>{{ detail_ui.relation_title }}</h2></div></div>
+      <p class="section-note">{{ detail_ui.relation_note }}</p>
+      <div class="relation-children">
+        <div class="source-row"><span>{{ detail_ui.predecessors_label }}</span><strong>{{ policy_relations.predecessors | length }}</strong></div>
+        {% for related in policy_relations.predecessors %}
+        <a href="{{ related.detail_path }}" class="mini-row"><div><strong>{{ related.title }}</strong><p>{{ related.published_at | date_fmt }} / {{ related.source_name }}</p></div></a>
+        {% else %}
+        <div class="empty-inline">{{ detail_ui.no_predecessors }}</div>
+        {% endfor %}
+        <div class="source-row"><span>{{ detail_ui.successor_label }}</span><strong>{% if policy_relations.successor %}1{% else %}0{% endif %}</strong></div>
+        {% if policy_relations.successor %}
+        <a href="{{ policy_relations.successor.detail_path }}" class="mini-row"><div><strong>{{ policy_relations.successor.title }}</strong><p>{{ policy_relations.successor.published_at | date_fmt }} / {{ policy_relations.successor.source_name }}</p></div></a>
+        {% else %}
+        <div class="empty-inline">{{ detail_ui.no_successor }}</div>
+        {% endif %}
+        {% if policy_relations.candidates %}
+        <div class="source-row"><span>{% if lang == 'zh' %}候选后继{% else %}Candidate successors{% endif %}</span><strong>{{ policy_relations.candidates | length }}</strong></div>
+        {% for related in policy_relations.candidates %}
+        <a href="{{ related.detail_path }}" class="mini-row"><div><strong>{{ related.title }}</strong><p>{{ related.published_at | date_fmt }} / {{ related.source_name }}</p></div></a>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="panel-card dense">
+      <div class="panel-head"><div><p class="eyebrow">{{ t('detail.related_eyebrow') }}</p><h2>{{ t('detail.related_title') }}</h2></div></div>
+      <div class="stack-list compact grouped-stack">
+        {% for group in related_items %}
+        <div class="grouped-mini-row">
+          <a href="{{ group.primary.detail_path }}" class="mini-row"><div><strong>{{ group.primary.title }}</strong><p>{{ group.primary.published_at | date_fmt }} / {{ group.primary.source_name }}</p></div></a>
+          <div class="grouped-meta">
+            <span class="summary-chip tone-info">{% if lang == 'zh' %}??? {{ group.source_count }}{% else %}Sources {{ group.source_count }}{% endif %}</span>
+            {% if group.related_count %}<span class="summary-chip tone-neutral">{% if lang == 'zh' %}??? {{ group.related_count }} ??% else %}+{{ group.related_count }} more{% endif %}</span>{% endif %}
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-inline">{{ t('common.none') }}</div>
+        {% endfor %}
+      </div>
+    </section>
+  </aside>
+</section>
+{% endblock %}

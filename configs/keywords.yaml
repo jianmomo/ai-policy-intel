@@ -1,0 +1,180 @@
+categories:
+  AI-Research:
+  - arxiv
+  - benchmark
+  - research
+  - training
+  - inference
+  - multimodal
+  - large language model
+  - llm
+  - 大模型
+  - 多模态
+  - 推理
+  - 训练
+  - 论文
+  AI-OpenSource:
+  - github
+  - open source
+  - release
+  - model
+  - agent
+  - rag
+  - 开源
+  - 智能体
+  AI-Industry:
+  - funding
+  - launch
+  - product
+  - enterprise
+  - 发布
+  - 上线
+  - 融资
+  - openai
+  - anthropic
+  - claude
+  - chatgpt
+  - gemini
+  - hugging face
+  - deepmind
+  - release notes
+  - introducing
+  - preview
+  - model
+  Policy-Central:
+  - gov.cn
+  - ministry
+  - state council
+  - central
+  - notice
+  - guideline
+  - 国务院
+  - 部委
+  - 国家
+  - 通知
+  - 意见
+  - 方案
+  - 规划
+  - 办法
+  - 网信
+  - 数据安全
+  - 风险评估
+  - 数据空间
+  - 网络生态
+  - 法治
+  - 规则
+  - 指南
+  - 答记者问
+  Policy-Local:
+  - province
+  - city
+  - municipal
+  - local
+  - 省级
+  - 地市
+  - 市政府
+  - 县域
+  - 地方
+  Policy-Subsidy:
+  - subsidy
+  - incentive
+  - grant
+  - support fund
+  - rebate
+  - 补贴
+  - 奖补
+  - 扶持
+  - 奖励
+  - 申报
+  Agriculture:
+  - agriculture
+  - rural
+  - greenhouse
+  - farming
+  - 农业
+  - 农村
+  - 大棚
+  - 种植
+  Energy:
+  - energy
+  - ev
+  - charging
+  - new energy
+  - 新能源
+  - 充电
+  - 汽车下乡
+  - 电动汽车
+tags:
+  Central-Policy:
+  - 国务院
+  - 国办
+  - 国家发展改革委
+  - 工业和信息化部
+  - 财政部
+  - 中央网信办
+  - 国家网信办
+  - 网信办
+  Local-Policy:
+  - 省级
+  - 地市
+  - 市政府
+  - 县域
+  - 大湾区
+  Subsidy:
+  - 补贴
+  - 奖补
+  - 奖励
+  - 申报
+  - 扶持
+  Planning:
+  - 规划
+  - 方案
+  - 实施方案
+  - 指南
+  Regulation:
+  - 办法
+  - 规定
+  - 指导意见
+  - 通知
+  - 监管
+  - 风险评估
+  - 合规
+  - 指南
+  - 规则
+  - 答记者问
+  Agriculture:
+  - 农业
+  - 农村
+  - 大棚
+  - 种植
+  EV:
+  - 电动汽车
+  - 充电基础设施
+  - 汽车下乡
+  - 新能源汽车
+  AI:
+  - ai
+  - 大模型
+  - 人工智能
+  - llm
+  OpenSource:
+  - github
+  - open source
+  - 开源
+  - release
+  - hugging face
+  - papers with code
+  - localllama
+  Official-AI:
+  - openai
+  - anthropic
+  - deepmind
+  - hugging face
+  - chatgpt
+  - claude
+  - gemini
+  Community:
+  - hacker news
+  - reddit
+  - localllama
+  - machinelearning

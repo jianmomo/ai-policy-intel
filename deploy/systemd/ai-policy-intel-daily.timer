@@ -1,0 +1,11 @@
+[Unit]
+Description=Run AI Policy Intel daily digest
+
+[Timer]
+OnCalendar=*-*-* 07:30:00 Asia/Hong_Kong
+Persistent=true
+Unit=ai-policy-intel-daily.service
+
+[Install]
+WantedBy=timers.target
+

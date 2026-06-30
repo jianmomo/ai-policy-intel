@@ -1,0 +1,10 @@
+[Unit]
+Description=Run AI Policy Intel backup
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 Asia/Hong_Kong
+Persistent=true
+Unit=ai-policy-intel-backup.service
+
+[Install]
+WantedBy=timers.target

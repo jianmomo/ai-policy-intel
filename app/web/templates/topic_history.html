@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ history_ui.title }}{% endblock %}
+{% block content %}
+<section class="library-header">
+  <div>
+    <p class="eyebrow">{{ history_ui.eyebrow }}</p>
+    <h1>{{ history_ui.heading }}</h1>
+    <p class="section-note">{{ history_ui.note }}</p>
+    <div class="inline-actions">
+      <a class="text-link" href="{{ cluster_path }}">{{ history_ui.back_clusters }}</a>
+      <a class="text-link" href="{{ library_path }}">{{ history_ui.open_library }}</a>
+      <a class="text-link" href="/ui/sources?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ history_ui.source_coverage }}</a>
+    </div>
+  </div>
+  <div class="count-card"><span>{{ history_ui.snapshot }}</span><strong>{{ latest_snapshot_date or '-' }}</strong></div>
+</section>
+
+<form class="filter-bar queue-filter" method="get">
+  <input type="hidden" name="lang" value="{{ lang }}" />
+  {% if admin_token %}<input type="hidden" name="admin_token" value="{{ admin_token }}" />{% endif %}
+  <select name="days">
+    {% for value in [7, 30, 90, 180, 365] %}
+    <option value="{{ value }}" {% if filters.days == value %}selected{% endif %}>{{ value }}d</option>
+    {% endfor %}
+  </select>
+  <select name="sort">
+    <option value="hot" {% if filters.sort == 'hot' %}selected{% endif %}>{{ history_ui.sort_hot }}</option>
+    <option value="rising" {% if filters.sort == 'rising' %}selected{% endif %}>{{ history_ui.sort_rising }}</option>
+    <option value="coverage" {% if filters.sort == 'coverage' %}selected{% endif %}>{{ history_ui.sort_coverage }}</option>
+  </select>
+  <select name="trend">
+    <option value="all" {% if filters.trend == 'all' %}selected{% endif %}>{{ history_ui.trend_all }}</option>
+    <option value="rising" {% if filters.trend == 'rising' %}selected{% endif %}>{{ history_ui.trend_rising }}</option>
+    <option value="falling" {% if filters.trend == 'falling' %}selected{% endif %}>{{ history_ui.trend_falling }}</option>
+    <option value="stable" {% if filters.trend == 'stable' %}selected{% endif %}>{{ history_ui.trend_stable }}</option>
+  </select>
+  <button type="submit">{{ t('common.search') }}</button>
+</form>
+
+<section class="summary-strip">
+  <span>{{ history_ui.series }}</span>
+  <div class="summary-chips">
+    <span class="summary-chip tone-good">{{ history_ui.series }} {{ series_count }}</span>
+    <span class="summary-chip tone-neutral">{{ history_ui.snapshot }} {{ latest_snapshot_date or '-' }}</span>
+  </div>
+</section>
+
+<section class="history-grid">
+  {% for topic in series %}
+  <article class="record-card history-card">
+    <div class="record-head">
+      <span class="summary-chip tone-good">{{ history_ui.latest }} {{ topic.latest_count }}</span>
+      <span class="summary-chip tone-neutral">{{ history_ui.previous }} {{ topic.previous_count }}</span>
+      <span class="summary-chip tone-{{ topic.delta_tone }}">{{ history_ui.trend }} {{ topic.delta_label }}</span>
+    </div>
+    <h2>{{ topic.topic }}</h2>
+    <div class="source-meta-grid compact-metrics">
+      <div><span>{{ history_ui.official }}</span><strong>{{ topic.latest_official_count }}</strong></div>
+      <div><span>{{ history_ui.broad }}</span><strong>{{ topic.latest_broad_count }}</strong></div>
+      <div><span>{{ history_ui.supplement }}</span><strong>{{ topic.latest_supplement_count }}</strong></div>
+      <div><span>{{ history_ui.sources }}</span><strong>{{ topic.latest_source_count }}</strong></div>
+      <div><span>{{ history_ui.peak }}</span><strong>{{ topic.peak_count }}</strong></div>
+    </div>
+    <div class="history-bars">
+      {% for point in topic.points %}
+      <div class="history-bar-col {% if point.active %}is-active{% endif %}">
+        <span class="history-bar-value">{{ point.count }}</span>
+        <div class="history-bar-track"><div class="history-bar-fill" style="height: {{ point.height }}%"></div></div>
+        <span class="history-bar-date">{{ point.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </article>
+  {% else %}
+  <section class="empty-state"><p class="eyebrow">{{ history_ui.eyebrow }}</p><h1>{{ history_ui.empty }}</h1></section>
+  {% endfor %}
+</section>
+{% endblock %}

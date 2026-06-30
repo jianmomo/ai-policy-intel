@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}{{ sources_ui.title }}{% endblock %}
+{% block content %}
+<section class="library-header">
+  <div>
+    <p class="eyebrow">{{ sources_ui.eyebrow }}</p>
+    <h1>{{ sources_ui.heading }}</h1>
+    <p class="section-note">{{ sources_ui.note }}</p>
+    <div class="inline-actions">
+      <a class="text-link" href="/ui?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ sources_ui.back_home }}</a>
+      <a class="text-link" href="/ui/policies/topics?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{% if lang == "zh" %}政策主题页{% else %}Policy Topics{% endif %}</a>
+      <a class="text-link" href="/ui/ai/topics?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{% if lang == "zh" %}AI 主题页{% else %}AI Topics{% endif %}</a>
+    </div>
+  </div>
+  <div class="count-card"><span>{{ sources_ui.summary_total }}</span><strong>{{ source_summary.total }}</strong></div>
+</section>
+
+<section class="summary-strip">
+  <span>{{ sources_ui.coverage_window }}</span>
+  <div class="summary-chips">
+    <span class="summary-chip tone-good">{{ filters.days }}d</span>
+    <span class="summary-chip tone-good">{{ sources_ui.summary_enabled }} {{ source_summary.enabled }}</span>
+    <span class="summary-chip tone-warning">{{ sources_ui.summary_warning }} {{ source_summary.warning }}</span>
+    <span class="summary-chip tone-pending">{{ sources_ui.summary_stale }} {{ source_summary.stale }}</span>
+    <span class="summary-chip tone-neutral">{{ sources_ui.summary_empty }} {{ source_summary.empty }}</span>
+    <span class="summary-chip tone-info">{{ sources_ui.summary_policy }} {{ source_summary.policy }}</span>
+    <span class="summary-chip tone-info">{{ sources_ui.summary_ai }} {{ source_summary.ai }}</span>
+  </div>
+</section>
+
+<form class="filter-bar queue-filter" method="get">
+  <input type="hidden" name="lang" value="{{ lang }}" />
+  {% if admin_token %}<input type="hidden" name="admin_token" value="{{ admin_token }}" />{% endif %}
+  <select name="days">
+    <option value="3" {% if filters.days == 3 %}selected{% endif %}>3d</option>
+    <option value="7" {% if filters.days == 7 %}selected{% endif %}>7d</option>
+    <option value="14" {% if filters.days == 14 %}selected{% endif %}>14d</option>
+    <option value="30" {% if filters.days == 30 %}selected{% endif %}>30d</option>
+  </select>
+  <button type="submit">{{ t('common.search') }}</button>
+</form>
+
+<section class="two-column-grid lower-grid">
+  <section class="panel-card dense">
+    <div class="panel-head"><div><p class="eyebrow">{{ sources_ui.gap_title }}</p><h2>{{ sources_ui.gap_ai }}</h2></div></div>
+    <div class="stack-list compact">
+      {% for hint in ai_gap_hints %}
+      <div class="warning-inline">
+        <div class="badge-row">
+          <span class="state-badge tone-{{ hint.tone }}">{{ sources_ui.gap_official }} {{ hint.official_count }}</span>
+          <span class="summary-chip tone-info">{{ sources_ui.track_supplement }} {{ hint.supplement_count }}</span>
+          <span class="summary-chip tone-warning">{{ sources_ui.track_broad }} {{ hint.broad_count }}</span>
+        </div>
+        <strong>{{ hint.name }}</strong>
+        <p>{{ sources_ui['gap_reason_' ~ hint.reason] }}</p>
+      </div>
+      {% else %}
+      <div class="empty-inline">{{ sources_ui.warning_empty }}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel-card dense">
+    <div class="panel-head"><div><p class="eyebrow">{{ sources_ui.gap_title }}</p><h2>{{ sources_ui.gap_policy }}</h2></div></div>
+    <div class="stack-list compact">
+      {% for hint in policy_gap_hints %}
+      <div class="warning-inline">
+        <div class="badge-row">
+          <span class="state-badge tone-{{ hint.tone }}">{{ sources_ui.gap_official }} {{ hint.official_count }}</span>
+          <span class="summary-chip tone-info">{{ sources_ui.track_supplement }} {{ hint.supplement_count }}</span>
+          <span class="summary-chip tone-warning">{{ sources_ui.track_broad }} {{ hint.broad_count }}</span>
+        </div>
+        <strong>{{ hint.name }}</strong>
+        <p>{{ sources_ui['gap_reason_' ~ hint.reason] }}</p>
+      </div>
+      {% else %}
+      <div class="empty-inline">{{ sources_ui.warning_empty }}</div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+
+{% if collector_warnings %}
+<section class="panel-card dense source-warning-panel">
+  <div class="panel-head"><div><p class="eyebrow">{{ sources_ui.warning_eyebrow }}</p><h2>{{ sources_ui.warning_title }}</h2></div></div>
+  <div class="warning-stack">
+    {% for warning in collector_warnings %}
+    <div class="warning-inline"><strong>{{ warning.source_name }}</strong><p>{{ warning.message }}</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="source-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ sources_ui.eyebrow }}</p><h2>{{ sources_ui.policy_section }}</h2></div></div>
+  <div class="source-card-grid">
+    {% for source in policy_sources %}
+    <article class="record-card source-card">
+      <div class="record-head">
+        <span class="state-badge tone-{{ source.health.tone }}">{{ source.health.label }}</span>
+        <span class="state-badge tone-{{ source.track.tone }}">{{ source.track.label }}</span>
+        <span class="summary-chip tone-{{ source.quality.tone }}">{{ sources_ui.quality }} {{ source.quality.score }}</span>
+      </div>
+      <h2><a href="{{ source.library_path }}">{{ source.name }}</a></h2>
+      <p class="record-summary">{{ source.id }}</p>
+      <div class="record-tags">{% for tag in source.tags %}<span>{{ tag }}</span>{% endfor %}</div>
+      <div class="source-meta-grid">
+        <div><span>{{ sources_ui.meta_type }}</span><strong>{{ source.type }}</strong></div>
+        <div><span>{{ sources_ui.meta_priority }}</span><strong>{{ source.priority }}</strong></div>
+        <div><span>{{ sources_ui.quality }}</span><strong>{{ source.quality.label }}</strong></div>
+        <div><span>{{ sources_ui.meta_last_seen }}</span><strong>{{ source.last_seen_at | datetime_fmt }}</strong></div>
+        <div><span>{{ sources_ui.meta_recent }}</span><strong>{{ source.recent_count }}</strong></div>
+        <div><span>{{ sources_ui.meta_total }}</span><strong>{{ source.total_count }}</strong></div>
+      </div>
+      <div class="inline-actions">
+        <a class="text-link" href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ sources_ui.open_source }}</a>
+        <a class="text-link" href="{{ source.library_path }}">{{ sources_ui.open_library }}</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="source-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ sources_ui.eyebrow }}</p><h2>{{ sources_ui.ai_section }}</h2></div></div>
+  <div class="source-card-grid">
+    {% for source in ai_sources %}
+    <article class="record-card source-card">
+      <div class="record-head">
+        <span class="state-badge tone-{{ source.health.tone }}">{{ source.health.label }}</span>
+        <span class="state-badge tone-{{ source.track.tone }}">{{ source.track.label }}</span>
+        <span class="summary-chip tone-{{ source.quality.tone }}">{{ sources_ui.quality }} {{ source.quality.score }}</span>
+      </div>
+      <h2><a href="{{ source.library_path }}">{{ source.name }}</a></h2>
+      <p class="record-summary">{{ source.id }}</p>
+      <div class="record-tags">{% for tag in source.tags %}<span>{{ tag }}</span>{% endfor %}</div>
+      <div class="source-meta-grid">
+        <div><span>{{ sources_ui.meta_type }}</span><strong>{{ source.type }}</strong></div>
+        <div><span>{{ sources_ui.meta_priority }}</span><strong>{{ source.priority }}</strong></div>
+        <div><span>{{ sources_ui.quality }}</span><strong>{{ source.quality.label }}</strong></div>
+        <div><span>{{ sources_ui.meta_last_seen }}</span><strong>{{ source.last_seen_at | datetime_fmt }}</strong></div>
+        <div><span>{{ sources_ui.meta_recent }}</span><strong>{{ source.recent_count }}</strong></div>
+        <div><span>{{ sources_ui.meta_total }}</span><strong>{{ source.total_count }}</strong></div>
+      </div>
+      <div class="inline-actions">
+        <a class="text-link" href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ sources_ui.open_source }}</a>
+        <a class="text-link" href="{{ source.library_path }}">{{ sources_ui.open_library }}</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

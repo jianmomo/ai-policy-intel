@@ -1,0 +1,11 @@
+.env
+.venv/
+.pytest_cache/
+__pycache__/
+*.pyc
+
+data/app.db
+data/backups/
+data/digests/
+
+hk-ai-policy-intel-master-plan.md

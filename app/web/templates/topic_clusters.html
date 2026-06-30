@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ topics_ui.title }}{% endblock %}
+{% block content %}
+<section class="library-header">
+  <div>
+    <p class="eyebrow">{{ topics_ui.eyebrow }}</p>
+    <h1>{{ topics_ui.heading }}</h1>
+    <p class="section-note">{{ topics_ui.note }}</p>
+    <div class="inline-actions">
+      <a class="text-link" href="{{ library_path }}">{{ topics_ui.open_library }}</a>
+      <a class="text-link" href="/ui/sources?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ topics_ui.source_coverage }}</a>
+      <a class="text-link" href="{{ request.url.path }}/history?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}&days={{ filters.days }}">{{ topics_ui.history_link }}</a>
+    </div>
+  </div>
+  <div class="count-card"><span>{{ topics_ui.matches }}</span><strong>{{ topic_count }}</strong></div>
+</section>
+
+<form class="filter-bar queue-filter" method="get">
+  <input type="hidden" name="lang" value="{{ lang }}" />
+  {% if admin_token %}<input type="hidden" name="admin_token" value="{{ admin_token }}" />{% endif %}
+  <select name="days">
+    {% for value in [7, 30, 90, 180, 365] %}
+    <option value="{{ value }}" {% if filters.days == value %}selected{% endif %}>{{ value }}d</option>
+    {% endfor %}
+  </select>
+  <select name="track">
+    <option value="all" {% if filters.track == 'all' %}selected{% endif %}>{{ topics_ui.track_all }}</option>
+    <option value="official" {% if filters.track == 'official' %}selected{% endif %}>{{ topics_ui.track_official }}</option>
+    <option value="broad" {% if filters.track == 'broad' %}selected{% endif %}>{{ topics_ui.track_broad }}</option>
+    <option value="supplement" {% if filters.track == 'supplement' %}selected{% endif %}>{{ topics_ui.track_supplement }}</option>
+  </select>
+  <select name="sort">
+    <option value="hot" {% if filters.sort == 'hot' %}selected{% endif %}>{{ topics_ui.sort_hot }}</option>
+    <option value="rising" {% if filters.sort == 'rising' %}selected{% endif %}>{{ topics_ui.sort_rising }}</option>
+    <option value="coverage" {% if filters.sort == 'coverage' %}selected{% endif %}>{{ topics_ui.sort_coverage }}</option>
+  </select>
+  <button type="submit">{{ t('common.search') }}</button>
+</form>
+
+<section class="source-card-grid">
+  {% for topic in topics %}
+  <article class="record-card source-card">
+    <div class="record-head">
+      <span class="summary-chip tone-good">{{ topics_ui.official }} {{ topic.official_count }}</span>
+      <span class="summary-chip tone-warning">{{ topics_ui.broad }} {{ topic.broad_count }}</span>
+      <span class="summary-chip tone-info">{{ topics_ui.supplement }} {{ topic.supplement_count }}</span>
+      {% if topic.delta %}<span class="summary-chip tone-{{ topic.delta.tone }}">{{ topics_ui.trend }} {{ topic.delta.label }}</span>{% endif %}
+    </div>
+    <h2>{{ topic.topic }}</h2>
+    <div class="source-meta-grid">
+      <div><span>{{ topics_ui.matches }}</span><strong>{{ topic.count }}</strong></div>
+      <div><span>{{ topics_ui.sources }}</span><strong>{{ topic.source_count }}</strong></div>
+      <div><span>{{ topics_ui.latest }}</span><strong>{{ topic.latest_at | datetime_fmt }}</strong></div>
+    </div>
+    <div class="stack-list compact grouped-stack">
+      {% for group in topic.sample_groups %}
+      <div class="grouped-mini-row">
+        <a href="{{ group.primary.detail_path }}" class="mini-row"><div><strong>{{ group.primary.title }}</strong><p>{{ group.primary.source_name }} / {{ group.primary.published_at | date_fmt }}</p></div></a>
+        <div class="grouped-meta">
+          <span class="summary-chip tone-info">{{ topics_ui.same_event }} {{ group.source_count }}</span>
+          {% if group.related_count %}<span class="summary-chip tone-neutral">{{ topics_ui.extra_sources }} +{{ group.related_count }}</span>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </article>
+  {% else %}
+  <section class="empty-state"><p class="eyebrow">{{ topics_ui.eyebrow }}</p><h1>{{ topics_ui.empty }}</h1></section>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}{{ t('dashboard.title') }}{% endblock %}
+{% block content %}
+<section class="hero-panel">
+  <div class="hero-copy">
+    <p class="eyebrow">{{ t('dashboard.eyebrow') }}</p>
+    <h1>{{ t('dashboard.hero_title') }}</h1>
+    <p class="hero-text">{{ t('dashboard.hero_text') }}</p>
+  </div>
+  <div class="hero-aside">
+    <div class="pulse-card">
+      <span class="pulse-label">{{ t('dashboard.latest_fetch') }}</span>
+      <strong>{{ hero.latest_fetch | datetime_fmt }}</strong>
+      <span class="pulse-note">{{ t('dashboard.latest_note') }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="metrics-grid">
+  <article class="metric-card warm"><span>{{ t('dashboard.metric_sources') }}</span><strong>{{ stats.sources }}</strong><small>{{ t('dashboard.metric_sources_note') }}</small></article>
+  <article class="metric-card"><span>{{ t('dashboard.metric_items') }}</span><strong>{{ stats.total_items }}</strong><small>{{ t('dashboard.metric_items_note') }}</small></article>
+  <article class="metric-card cool"><span>{{ t('dashboard.metric_policy') }}</span><strong>{{ stats.policy_items }}</strong><small>{{ t('dashboard.metric_policy_note') }}</small></article>
+  <article class="metric-card accent"><span>{{ t('dashboard.metric_ai') }}</span><strong>{{ stats.ai_items }}</strong><small>{{ t('dashboard.metric_ai_note') }}</small></article>
+  <article class="metric-card soft"><span>{{ t('dashboard.metric_active_policy') }}</span><strong>{{ stats.active_policies }}</strong><small>{{ t('dashboard.metric_active_policy_note') }}</small></article>
+  <article class="metric-card soft"><span>{{ t('dashboard.metric_wechat') }}</span><strong>{{ hero.wechat_supplements }}</strong><small>{{ t('dashboard.metric_wechat_note') }}</small></article>
+</section>
+
+<section class="two-column-grid">
+  <section class="panel-card">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">{{ t('dashboard.policy_eyebrow') }}</p>
+        <h2>{{ t('dashboard.policy_title') }}</h2>
+      </div>
+      <a href="/ui/policies?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}" class="text-link">{{ t('dashboard.policy_link') }}</a>
+    </div>
+    <div class="stack-list">
+      {% for item in policy_focus %}
+      <a href="{{ item.detail_path }}" class="intel-row">
+        <div class="intel-main">
+          <div class="badge-row">
+            <span class="state-badge tone-{{ item.lifecycle.tone }}">{{ item.lifecycle.label }}</span>
+            <span class="state-badge tone-{{ item.policy_signal.tone }}">{{ item.policy_signal.label }}</span>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.summary or item.reason }}</p>
+        </div>
+        <div class="intel-meta"><span>{{ item.source_name }}</span><strong>{{ item.score | score_fmt }}</strong></div>
+      </a>
+      {% else %}
+      <div class="empty-inline">{{ t('dashboard.empty') }}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel-card">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">{{ t('dashboard.ai_eyebrow') }}</p>
+        <h2>{{ t('dashboard.ai_title') }}</h2>
+      </div>
+      <a href="/ui/ai?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}" class="text-link">{{ t('dashboard.ai_link') }}</a>
+    </div>
+    <div class="stack-list">
+      {% for item in ai_focus %}
+      <a href="{{ item.detail_path }}" class="intel-row">
+        <div class="intel-main">
+          <span class="pill">{{ item.category }}</span>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.summary or item.reason }}</p>
+        </div>
+        <div class="intel-meta"><span>{{ item.source_name }}</span><strong>{{ item.score | score_fmt }}</strong></div>
+      </a>
+      {% else %}
+      <div class="empty-inline">{{ t('dashboard.empty') }}</div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+
+<section class="two-column-grid lower-grid">
+  <section class="panel-card dense">
+    <div class="panel-head"><div><p class="eyebrow">{{ t('dashboard.recent_eyebrow') }}</p><h2>{{ t('dashboard.recent_title') }}</h2></div></div>
+    <div class="stack-list compact">
+      {% for item in recent_feed %}
+      <a href="{{ item.detail_path }}" class="mini-row">
+        <div><strong>{{ item.title }}</strong><p>{{ item.source_name }} / {{ item.fetched_at | datetime_fmt }}</p></div>
+        <span class="mini-kind kind-{{ item.kind }}">{{ item.kind_label }}</span>
+      </a>
+      {% else %}
+      <div class="empty-inline">{{ t('dashboard.empty') }}</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel-card dense">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">{{ sources_ui.preview_eyebrow }}</p>
+        <h2>{{ sources_ui.preview_title }}</h2>
+      </div>
+      <a href="/ui/sources?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}" class="text-link">{{ sources_ui.nav_label }}</a>
+    </div>
+    <p class="section-note">{{ sources_ui.preview_note }}</p>
+    <div class="stack-list compact">
+      {% for source in source_health_preview %}
+      <a href="{{ source.library_path }}" class="mini-row">
+        <div>
+          <div class="badge-row">
+            <span class="state-badge tone-{{ source.health.tone }}">{{ source.health.label }}</span>
+            <span class="state-badge tone-{{ source.track.tone }}">{{ source.track.label }}</span>
+          </div>
+          <strong>{{ source.name }}</strong>
+          <p>{{ sources_ui.meta_recent }} {{ source.recent_count }} / {{ sources_ui.meta_total }} {{ source.total_count }}</p>
+        </div>
+      </a>
+      {% else %}
+      <div class="empty-inline">{{ t('dashboard.empty') }}</div>
+      {% endfor %}
+    </div>
+    {% if collector_warnings %}
+    <div class="warning-stack">
+      {% for warning in collector_warnings %}
+      <div class="warning-inline"><strong>{{ warning.source_name }}</strong><p>{{ warning.message }}</p></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}

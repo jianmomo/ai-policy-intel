@@ -1,0 +1,580 @@
+sources:
+- id: gov-news
+  name: China Government News
+  category: policy
+  region: cn
+  type: html
+  url: https://www.gov.cn/yaowen/liebiao/
+  enabled: false
+  priority: 9
+  tags:
+  - policy
+  - central
+  - broad-news
+  max_results: 12
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /yaowen/liebiao/20
+    - /yaowen/content_
+    deny_url_keywords:
+    - /page_
+    - /index.htm
+- id: gov-policy
+  name: China Government Policy
+  category: policy
+  region: cn
+  type: html
+  url: https://www.gov.cn/zhengce/index.htm
+  enabled: true
+  priority: 10
+  tags:
+  - policy
+  - central
+  - subsidy
+- id: miit
+  name: MIIT Broad News
+  category: policy
+  region: cn
+  type: html
+  url: https://www.miit.gov.cn/
+  enabled: true
+  priority: 8
+  tags:
+  - policy
+  - industry
+  - ai
+  - broad-news
+  max_results: 12
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /xwfb/
+    deny_url_keywords:
+    - /zwgk/
+    - /index.html
+    - /index.htm
+    - beian.miit.gov.cn
+- id: miit-policy
+  name: MIIT Policy
+  category: policy
+  region: cn
+  type: html
+  url: https://www.miit.gov.cn/
+  enabled: true
+  priority: 10
+  tags:
+  - policy
+  - industry
+  - ai
+  - official-policy
+  max_results: 10
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /zwgk/zcwj/
+    - /zwgk/zcjd/
+    - /zwgk/wjgs/
+    deny_url_keywords:
+    - /index.html
+    - /index.htm
+    headers:
+      Referer: https://www.miit.gov.cn/
+- id: ndrc-notice
+  name: NDRC Notices
+  category: policy
+  region: cn
+  type: html
+  url: https://www.ndrc.gov.cn/xwdt/tzgg/
+  enabled: true
+  priority: 9
+  tags:
+  - policy
+  - central
+  - ndrc
+  max_results: 10
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /xwdt/tzgg/2026
+    - /xwdt/tzgg/20
+    deny_url_keywords:
+    - wap_index.html
+    - /index.html
+- id: cac-gov
+  name: CAC Governance News
+  category: policy
+  region: cn
+  type: html
+  url: https://www.cac.gov.cn/wxzw/A0937index_1.htm
+  enabled: true
+  priority: 8
+  tags:
+  - policy
+  - central
+  - cyberspace
+  - data
+  max_results: 10
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /2026-
+    - /2025-
+    - /wxzw/
+    deny_url_keywords:
+    - A0937index_
+    - A09370101index_
+    - A09370102index_
+    - /search
+    - 'javascript:'
+    - A093711index_
+- id: ai-google-news
+  name: AI Google News RSS
+  category: ai
+  region: global
+  type: rss
+  url: https://news.google.com/rss/search?q=large+language+model+OR+OpenAI+OR+Anthropic+OR+Gemini&hl=en-US&gl=US&ceid=US:en
+  enabled: true
+  priority: 8
+  tags:
+  - ai
+  - llm
+  - news
+  max_results: 12
+- id: openai-news
+  name: OpenAI News
+  category: ai
+  region: global
+  type: rss
+  url: https://openai.com/news/rss.xml
+  enabled: true
+  priority: 10
+  tags:
+  - ai
+  - official
+  - openai
+  - product
+  max_results: 10
+- id: anthropic-news
+  name: Anthropic News
+  category: ai
+  region: global
+  type: html
+  url: https://www.anthropic.com/news
+  enabled: true
+  priority: 10
+  tags:
+  - ai
+  - official
+  - anthropic
+  - product
+  max_results: 12
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /news/
+    deny_url_keywords:
+    - /careers
+    - /policy
+    - /research
+    - /claude.com
+    - /platform.
+    allow_title_keywords:
+    - claude
+    - anthropic
+    - introducing
+    - announcements
+    - policy
+    - product
+- id: deepmind-news
+  name: Google DeepMind News
+  category: ai
+  region: global
+  type: html
+  url: https://deepmind.google/blog/
+  enabled: true
+  priority: 9
+  tags:
+  - ai
+  - official
+  - deepmind
+  - model
+  max_results: 12
+  extra:
+    same_domain_only: true
+    allow_title_keywords:
+    - gemini
+    - deepmind
+    - alpha
+    - genie
+    - model
+    - ai
+    - safety
+    - research
+    deny_title_keywords:
+    - explore
+    - learn more
+    - about google deepmind
+    - careers
+- id: huggingface-blog
+  name: Hugging Face Blog
+  category: ai
+  region: global
+  type: html
+  url: https://huggingface.co/blog
+  enabled: true
+  priority: 8
+  tags:
+  - ai
+  - official
+  - huggingface
+  - opensource
+  max_results: 12
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /blog/
+    deny_url_keywords:
+    - /docs
+    - /learn
+    - /models
+    - /datasets
+    - /spaces
+- id: paperswithcode-latest
+  name: Papers with Code Latest
+  category: ai
+  region: global
+  type: html
+  url: https://paperswithcode.com/latest
+  enabled: true
+  priority: 8
+  tags:
+  - ai
+  - research
+  - opensource
+  - paperswithcode
+  max_results: 12
+  extra:
+    same_domain_only: true
+    allow_url_keywords:
+    - /paper/
+- id: reddit-localllama
+  name: Reddit LocalLLaMA
+  category: ai
+  region: global
+  type: rss
+  url: https://www.reddit.com/r/LocalLLaMA/.rss
+  enabled: true
+  priority: 6
+  tags:
+  - ai
+  - community
+  - llm
+  - opensource
+  max_results: 8
+- id: reddit-machinelearning
+  name: Reddit MachineLearning
+  category: ai
+  region: global
+  type: rss
+  url: https://www.reddit.com/r/MachineLearning/.rss
+  enabled: true
+  priority: 6
+  tags:
+  - ai
+  - community
+  - research
+  max_results: 8
+- id: hackernews-rss
+  name: Hacker News Frontpage
+  category: ai
+  region: global
+  type: rss
+  url: https://news.ycombinator.com/rss
+  enabled: true
+  priority: 5
+  tags:
+  - ai
+  - community
+  - startup
+  max_results: 10
+- id: arxiv-cs-ai
+  name: arXiv CS.AI
+  category: ai
+  region: global
+  type: arxiv
+  url: https://export.arxiv.org/api/query
+  enabled: true
+  priority: 9
+  tags:
+  - ai
+  - research
+  query: cat:cs.AI OR cat:cs.CL
+  max_results: 10
+  extra:
+    sortBy: submittedDate
+    sortOrder: descending
+- id: github-oss
+  name: GitHub AI OSS
+  category: ai
+  region: global
+  type: github
+  url: https://api.github.com/search/repositories
+  enabled: true
+  priority: 7
+  tags:
+  - ai
+  - opensource
+  - github
+  query: (llm OR agent OR rag OR multimodal) in:name,description,readme
+  max_results: 10
+  extra:
+    sort: updated
+    order: desc
+- id: wechat-ai-jiqizhixin
+  name: WeChat Jiqizhixin
+  category: ai
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/51e92aad2728acdd1fda7314be32b16639353001.xml
+  enabled: true
+  priority: 5
+  tags:
+  - ai
+  - wechat
+  - supplement
+  - media
+  max_results: 5
+  extra:
+    allow_keywords:
+    - ai
+    - 大模型
+    - 模型
+    - 智能体
+    - agent
+    - openai
+    - claude
+    - gpt
+    - gemini
+    - deepseek
+    - 推理
+    - 多模态
+    - 开源
+    - 论文
+    deny_title_keywords:
+    - 报名
+    - 倒计时
+    - 招聘
+- id: wechat-ai-xinzhiyuan
+  name: WeChat Xinzhiyuan
+  category: ai
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/ede30346413ea70dbef5d485ea5cbb95cca446e7.xml
+  enabled: true
+  priority: 5
+  tags:
+  - ai
+  - wechat
+  - supplement
+  - media
+  max_results: 5
+  extra:
+    allow_keywords:
+    - ai
+    - 大模型
+    - 模型
+    - 智能体
+    - agent
+    - openai
+    - claude
+    - gpt
+    - gemini
+    - deepseek
+    - 推理
+    - 多模态
+    - 开源
+    deny_title_keywords:
+    - 报名
+    - 倒计时
+    - 英雄帖
+    - 招聘
+- id: wechat-ai-liangziwei
+  name: WeChat Liangziwei
+  category: ai
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/7131b577c61365cb47e81000738c10d872685908.xml
+  enabled: true
+  priority: 5
+  tags:
+  - ai
+  - wechat
+  - supplement
+  - media
+  max_results: 5
+  extra:
+    allow_keywords:
+    - ai
+    - 大模型
+    - 模型
+    - 智能体
+    - agent
+    - openai
+    - claude
+    - gpt
+    - gemini
+    - deepseek
+    - 推理
+    - 多模态
+    - 开源
+    - 算法
+    deny_title_keywords:
+    - 报名
+    - 倒计时
+    - 招聘
+- id: wechat-ai-paperweekly
+  name: WeChat PaperWeekly
+  category: ai
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/3be891c2f4e526629ab055a297cc2cd6c1f0a563.xml
+  enabled: true
+  priority: 5
+  tags:
+  - ai
+  - wechat
+  - supplement
+  - research
+  max_results: 5
+  extra:
+    allow_keywords:
+    - ai
+    - 大模型
+    - 模型
+    - 论文
+    - agent
+    - openai
+    - claude
+    - gpt
+    - gemini
+    - deepseek
+    - 推理
+    - 多模态
+    - 训练
+    - 开源
+    deny_title_keywords:
+    - 报名
+    - 倒计时
+    - 挑战赛
+- id: wechat-ai-datawhale
+  name: WeChat Datawhale
+  category: ai
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/4d620d988cb21cfeefd2263207221f0dc70df9ff.xml
+  enabled: true
+  priority: 4
+  tags:
+  - ai
+  - wechat
+  - supplement
+  - tutorial
+  max_results: 4
+  extra:
+    allow_keywords:
+    - ai
+    - 大模型
+    - 模型
+    - agent
+    - openai
+    - claude
+    - gpt
+    - gemini
+    - deepseek
+    - 推理
+    - 多模态
+    - 教程
+    - 开源
+    deny_title_keywords:
+    - 报名
+    - 倒计时
+    - 招聘
+- id: wechat-policy-infosec
+  name: WeChat China InfoSec
+  category: policy
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/567cb1a8cf49f3e2c141d9d8085712f42ffc2fef.xml
+  enabled: true
+  priority: 4
+  tags:
+  - policy
+  - wechat
+  - supplement
+  - security
+  - data
+  max_results: 4
+  extra:
+    allow_keywords:
+    - 数据
+    - 安全
+    - 网信
+    - 算法
+    - 人工智能
+    - 大模型
+    - 网络
+    - 治理
+    - 风险
+    - 合规
+    - 评估
+    - 隐私
+    - 平台
+    - 法治
+    deny_title_keywords:
+    - 大会
+    - 峰会
+    - 开幕
+    - 直播
+    - 报名
+    - 倒计时
+- id: wechat-policy-shushizixun
+  name: WeChat Shushizixun
+  category: policy
+  region: cn
+  type: rss
+  url: https://wechat2rss.xlab.app/feed/9da87fba8130d0c2dc52cc45b844f045227e06a7.xml
+  enabled: true
+  priority: 3
+  tags:
+  - policy
+  - wechat
+  - supplement
+  - security
+  - industry
+  max_results: 4
+  extra:
+    allow_keywords:
+    - 数据
+    - 安全
+    - 网信
+    - 人工智能
+    - ai
+    - 大模型
+    - 网络
+    - 治理
+    - 风险
+    - 合规
+    - 评估
+    deny_title_keywords:
+    - 大会
+    - 峰会
+    - 开幕
+    - 直播
+    - 报名
+    - 倒计时
+    - ISC
+    - 圆满落幕
+    - 预约
+    - 白皮书
+    - 融资

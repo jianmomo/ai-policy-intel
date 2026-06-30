@@ -1,0 +1,11 @@
+[Unit]
+Description=Run AI Policy Intel weekly digest
+
+[Timer]
+OnCalendar=Sat *-*-* 08:00:00 Asia/Hong_Kong
+Persistent=true
+Unit=ai-policy-intel-weekly.service
+
+[Install]
+WantedBy=timers.target
+

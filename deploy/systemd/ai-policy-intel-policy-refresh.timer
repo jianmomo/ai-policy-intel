@@ -1,0 +1,10 @@
+[Unit]
+Description=Run AI Policy Intel policy lifecycle refresh
+
+[Timer]
+OnCalendar=*-*-* 12:10:00 Asia/Hong_Kong
+Persistent=true
+Unit=ai-policy-intel-policy-refresh.service
+
+[Install]
+WantedBy=timers.target

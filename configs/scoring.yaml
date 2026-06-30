@@ -1,0 +1,10 @@
+weights:
+  source_priority_multiplier: 1.5
+  keyword_match: 3
+  fresh_item_bonus: 4
+  official_source_bonus: 3
+  multi_tag_bonus: 1
+thresholds:
+  daily_limit: 20
+  weekly_limit: 50
+

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ relation_ui.title }}{% endblock %}
+{% block content %}
+<section class="library-header">
+  <div>
+    <p class="eyebrow">{{ relation_ui.eyebrow }}</p>
+    <h1>{{ relation_ui.heading }}</h1>
+    <p class="section-note">{{ relation_ui.note }}</p>
+    <div class="inline-actions">
+      <a class="text-link" href="/ui/admin/policies?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ relation_ui.back_admin }}</a>
+      <a class="text-link" href="/ui/admin/policy-queue?lang={{ lang }}{% if admin_token %}&admin_token={{ admin_token }}{% endif %}">{{ queue_ui.nav_label }}</a>
+    </div>
+  </div>
+  <div class="count-card"><span>{{ relation_ui.group_label }}</span><strong>{{ group_count }}</strong></div>
+</section>
+
+<section class="relation-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ relation_ui.group_label }}</p><h2>{{ group_count }}</h2></div></div>
+  <div class="relation-stack">
+    {% for group in groups %}
+    <article class="record-card relation-card">
+      <div class="relation-columns">
+        <div class="relation-main">
+          <p class="eyebrow">{{ relation_ui.successor_label }}</p>
+          {% if group.successor %}
+          <h2><a href="{{ group.successor.admin_path }}">{{ group.successor.title }}</a></h2>
+          <p class="record-summary">{{ group.successor.source_name }} / {{ group.successor.published_at | date_fmt }}</p>
+          {% else %}
+          <h2>{{ group.successor_title }}</h2>
+          <p class="record-summary">{{ relation_ui.no_successor }}</p>
+          {% endif %}
+        </div>
+        <div class="relation-side">
+          <span class="summary-chip tone-info">{{ group.count }}</span>
+        </div>
+      </div>
+      <div class="relation-children">
+        <p class="eyebrow">{{ relation_ui.children_label }}</p>
+        <div class="stack-list compact">
+          {% for child in group.children %}
+          <a href="{{ child.admin_path }}" class="mini-row"><div><strong>{{ child.title }}</strong><p>{{ child.source_name }} / {{ child.published_at | date_fmt }}</p></div></a>
+          {% endfor %}
+        </div>
+      </div>
+    </article>
+    {% else %}
+    <div class="empty-inline">{{ relation_ui.empty_groups }}</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="relation-section">
+  <div class="panel-head"><div><p class="eyebrow">{{ relation_ui.orphan_label }}</p><h2>{{ orphan_count }}</h2></div></div>
+  <div class="queue-grid">
+    {% for item in orphans %}
+    <article class="record-card queue-card">
+      <div class="record-head"><span class="state-badge tone-info">{{ item.lifecycle.label }}</span></div>
+      <h2><a href="{{ item.admin_path }}">{{ item.title }}</a></h2>
+      <p class="record-summary">{{ item.summary or item.reason }}</p>
+      <div class="record-meta"><span>{{ item.source_name }}</span><span>{{ item.published_at | date_fmt }}</span></div>
+      <a class="text-link" href="{{ item.admin_path }}">{{ relation_ui.open_override }}</a>
+    </article>
+    {% else %}
+    <div class="empty-inline">{{ relation_ui.empty_orphans }}</div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

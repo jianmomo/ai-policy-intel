@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="{{ lang_attr }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}AI Policy Intel{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <a class="brand-mark" href="/ui?lang={{ lang }}">{{ app_name }}</a>
+        <p class="brand-subtitle">{{ t('app.subtitle') }}</p>
+      </div>
+      <div class="topbar-actions">
+        <nav class="topnav">
+          <a href="/ui?lang={{ lang }}" class="{% if active_nav == 'dashboard' %}is-active{% endif %}">{{ t('nav.dashboard') }}</a>
+          <a href="/ui/policies?lang={{ lang }}" class="{% if active_nav == 'policies' %}is-active{% endif %}">{{ t('nav.policies') }}</a>
+          <a href="/ui/ai?lang={{ lang }}" class="{% if active_nav == 'ai' %}is-active{% endif %}">{{ t('nav.ai') }}</a>
+        </nav>
+        <div class="lang-switch" aria-label="{{ t('lang.switch') }}">
+          <a href="{{ switch_urls.zh }}" class="{% if lang == 'zh' %}is-active{% endif %}">{{ t('lang.zh') }}</a>
+          <a href="{{ switch_urls.en }}" class="{% if lang == 'en' %}is-active{% endif %}">{{ t('lang.en') }}</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>
