@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db.models import Item, Source
 from app.topic_intel import topic_name_for_item
+from app.utils.dedup import items_look_duplicate
 
 OFFICIAL_POLICY_SOURCE_IDS = {"gov-policy", "miit-policy", "ndrc-notice"}
 BROAD_POLICY_SOURCE_IDS = {"gov-news", "miit", "cac-gov"}
@@ -330,7 +331,6 @@ def _translate_to_chinese(text: str, cache: dict[str, str]) -> str:
 def _policy_item(item: Item) -> bool:
     return (
         item.category.startswith("Policy-")
-        or item.region == "cn"
         or item.source_id in {"gov-policy", "gov-news", "miit", "miit-policy", "ndrc-notice", "cac-gov"}
         or item.source_id.startswith("wechat-policy-")
     )
@@ -492,6 +492,29 @@ def _published_label(item: Item) -> str:
     return point.strftime("%Y-%m-%d %H:%M") if point else "\u672a\u77e5"
 
 
+def prepare_delivery_items(items: list[Item]) -> list[Item]:
+    """Keep one representative per news event before any delivery channel renders it."""
+    selected: list[Item] = []
+    ordered = sorted(items, key=lambda row: (row.score or 0.0, _sort_dt(row)), reverse=True)
+    for item in ordered:
+        if not (_ai_item(item) or _policy_item(item)):
+            continue
+        if any(
+            items_look_duplicate(
+                item.title,
+                item.published_at or item.fetched_at,
+                existing.title,
+                existing.published_at or existing.fetched_at,
+                item.url,
+                existing.url,
+            )
+            for existing in selected
+        ):
+            continue
+        selected.append(item)
+    return selected
+
+
 def _group_items(items: list[Item], kind: str, source_map: dict[str, Source]) -> list[dict[str, object]]:
     groups: dict[str, list[Item]] = {}
     for item in items:
@@ -550,34 +573,26 @@ def _select_entries(items: list[Item], kind: str, source_map: dict[str, Source],
 
 
 def _overview_lines(title: str, entries: list[dict[str, object]], daily: bool) -> list[str]:
-    items = [entry["item"] for entry in entries]
     signal_counts = Counter(str(entry["signal"]) for entry in entries)
     topic_counts = Counter(str(entry["topic"]) for entry in entries if entry["topic"])
-    must_read = items[:3]
+    source_count = len({entry["item"].source_id for entry in entries})
     high = "\u9ad8\u4f18\u5148\u7ea7"
     medium = "\u503c\u5f97\u5173\u6ce8"
     low = "\u8865\u5145\u89c2\u5bdf"
+    conclusion = "\u4eca\u65e5\u7ed3\u8bba" if daily else "\u672c\u671f\u7ed3\u8bba"
     lines = [
         f"<b>{_escape(title)}</b>",
-        f"\u65e5\u671f\uff1a{datetime.utcnow().strftime('%Y-%m-%d')}",
-        f"\u7a97\u53e3\uff1a{_overview_window(daily)}",
+        f"{datetime.utcnow().strftime('%Y-%m-%d')} \u00b7 \u672c\u6b21\u65b0\u589e {len(entries)} \u6761 \u00b7 {source_count} \u4e2a\u6765\u6e90",
+        f"<b>{conclusion}</b>",
+        f"{high} {signal_counts.get(high, 0)} \u00b7 {medium} {signal_counts.get(medium, 0)} \u00b7 {low} {signal_counts.get(low, 0)}",
         "",
-        "\u4eca\u65e5\u7ed3\u8bba\uff1a" if daily else "\u672c\u671f\u7ed3\u8bba\uff1a",
-        f"- {high}\uff1a{signal_counts.get(high, 0)} \u6761",
-        f"- {medium}\uff1a{signal_counts.get(medium, 0)} \u6761",
-        f"- {low}\uff1a{signal_counts.get(low, 0)} \u6761",
-        "",
-        "\u91cd\u70b9\u4e3b\u9898\uff1a",
+        "<b>\u5173\u6ce8\u4e3b\u9898</b>",
     ]
-    for topic, _count in topic_counts.most_common(3):
-        lines.append(f"- {_escape(topic)}")
+    for topic, count in topic_counts.most_common(3):
+        lines.append(f"\u2022 {_escape(topic)}\uff08{count}\uff09")
     if not topic_counts:
-        lines.append("- \u6682\u65e0\u660e\u663e\u4e3b\u9898\u96c6\u4e2d")
-    lines.extend(["", "\u5efa\u8bae\u4f18\u5148\u770b\uff1a"])
-    for index, item in enumerate(must_read, start=1):
-        lines.append(f"{index}. {_escape(_translate_to_chinese(item.title, {}) or item.title)}")
-    if not must_read:
-        lines.append("1. \u6682\u65e0\u53ef\u63a8\u9001\u6761\u76ee")
+        lines.append("\u2022 \u6682\u65e0\u660e\u663e\u4e3b\u9898\u96c6\u4e2d")
+    lines.extend(["", "<i>\u4e0b\u65b9\u4e3a\u53bb\u91cd\u540e\u7684\u8be6\u60c5\uff0c\u6bcf\u4e2a\u4e8b\u4ef6\u4ec5\u5c55\u793a\u4e00\u6b21\u3002</i>"])
     return lines
 
 
@@ -585,26 +600,26 @@ def _entry_block(index: int, entry: dict[str, object], source_map: dict[str, Sou
     item: Item = entry["item"]
     translated_title = _translate_to_chinese(item.title, translate_cache)
     display_title = translated_title or item.title
-    label = str(entry["label"])
-    lines = [f"<b>{index}. [{_escape(str(entry['signal']))}] {_escape(display_title)}</b>"]
-    if translated_title and translated_title != item.title:
-        lines.append(f"\u539f\u6587: {_escape(item.title)}")
-    lines.append(f"\u7c7b\u578b: {_escape(label)}")
-    lines.append(f"\u65f6\u95f4: {_escape(_published_label(item))}")
-    lines.append(f"\u4e3a\u4ec0\u4e48\u91cd\u8981: {_escape(str(entry['importance']))}")
-    if item.status and _policy_item(item):
-        lines.append(f"\u72b6\u6001: {_escape(item.status)}")
-    if entry["related_count"]:
-        lines.append(f"\u540c\u4e8b\u4ef6\u6765\u6e90: {entry['source_count']} \u4e2a | \u76f8\u5173\u6765\u6e90: {_escape(' / '.join(entry['source_names']))}")
+    source_name = _friendly_source(source_map.get(item.source_id), item.source_id)
+    meta = [f"\u7c7b\u578b: {entry['label']}", source_name, _published_label(item)]
     tags = _friendly_tags(item)
     if tags:
-        lines.append(f"\u76f8\u5173\u4e3b\u9898: {_escape(tags)}")
+        meta.append(tags)
+    if _policy_item(item) and item.status:
+        meta.append(f"\u72b6\u6001\uff1a{item.status}")
+    separator = " \u00b7 "
+    lines = [
+        f"<b>{index}. [{_escape(str(entry['signal']))}] {_escape(display_title)}</b>",
+        f"<i>{_escape(separator.join(meta))}</i>",
+    ]
+    if translated_title and translated_title != item.title:
+        lines.append(f"\u539f\u6587\uff1a{_escape(item.title)}")
     summary = _friendly_summary(item.summary or item.raw_content, translate_cache)
     if summary:
-        lines.append(f"\u4e2d\u6587\u6458\u8981: {_escape(summary)}")
-    source_name = _friendly_source(source_map.get(item.source_id), item.source_id)
-    lines.append(f"\u6765\u6e90: {_escape(source_name)} | \u5206\u6570: {item.score:.1f}")
-    lines.append('<a href="' + _escape(item.url) + '">\u67e5\u770b\u539f\u6587</a>')
+        lines.append(f"<blockquote>{_escape(summary)}</blockquote>")
+    if entry["related_count"]:
+        lines.append(f"\u540c\u4e8b\u4ef6\u6765\u6e90: {entry['source_count']} \u4e2a")
+    lines.append('<a href="' + _escape(item.url) + '">\u9605\u8bfb\u539f\u6587</a>')
     return "\n".join(lines)
 
 
@@ -685,16 +700,19 @@ def _send_telegram_message(chat_id: str, text: str) -> None:
     response.raise_for_status()
 
 
-def send_split_telegram_digests(session: Session, daily: bool = True) -> list[str]:
+def send_split_telegram_digests(session: Session, daily: bool = True, items: list[Item] | None = None) -> list[str]:
     if not telegram_delivery_configured():
         return ["telegram delivery skipped"]
 
-    rows = session.execute(select(Item).order_by(Item.score.desc(), Item.fetched_at.desc()).limit(180)).scalars().all()
+    rows = items if items is not None else session.execute(select(Item).order_by(Item.score.desc(), Item.fetched_at.desc()).limit(180)).scalars().all()
+    rows = prepare_delivery_items(rows)[:180]
+    if not rows:
+        return ["telegram delivery skipped: no new items"]
     source_rows = session.execute(select(Source)).scalars().all()
     source_map = {row.id: row for row in source_rows}
 
-    ai_items = [row for row in rows if _ai_item(row)]
     policy_items = [row for row in rows if _policy_item(row)]
+    ai_items = [row for row in rows if _ai_item(row) and not _policy_item(row)]
     translate_cache: dict[str, str] = {}
     results: list[str] = []
 

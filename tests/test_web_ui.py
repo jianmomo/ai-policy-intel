@@ -169,6 +169,7 @@ def test_admin_policy_relations_route_local_access() -> None:
 
 
 def test_admin_source_route_local_access() -> None:
+    ensure_policy_source()
     response = client.get('/ui/admin/sources?lang=en')
     assert response.status_code == 200
     assert 'Source Admin | AI Policy Intel' in response.text

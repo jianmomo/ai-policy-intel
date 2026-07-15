@@ -1,11 +1,22 @@
 .env
+.env.*
+!.env.example
 .venv/
-.pytest_cache/
+venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
 
-data/app.db
-data/backups/
-data/digests/
+data/*
+!data/.gitkeep
+backups/
+logs/
+*.db
+*.db-*
+*.sqlite*
+*.log
 
-hk-ai-policy-intel-master-plan.md
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

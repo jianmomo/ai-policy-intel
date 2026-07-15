@@ -6,12 +6,13 @@ sources:
   type: html
   url: https://www.gov.cn/yaowen/liebiao/
   enabled: false
-  priority: 9
+  priority: 5
   tags:
   - policy
   - central
   - broad-news
-  max_results: 12
+  query: ''
+  max_results: 10
   extra:
     same_domain_only: true
     allow_url_keywords:
@@ -32,6 +33,9 @@ sources:
   - policy
   - central
   - subsidy
+  query: ''
+  max_results: 10
+  extra: {}
 - id: miit
   name: MIIT Broad News
   category: policy
@@ -45,6 +49,7 @@ sources:
   - industry
   - ai
   - broad-news
+  query: ''
   max_results: 12
   extra:
     same_domain_only: true
@@ -68,6 +73,7 @@ sources:
   - industry
   - ai
   - official-policy
+  query: ''
   max_results: 10
   extra:
     same_domain_only: true
@@ -92,6 +98,7 @@ sources:
   - policy
   - central
   - ndrc
+  query: ''
   max_results: 10
   extra:
     same_domain_only: true
@@ -114,6 +121,7 @@ sources:
   - central
   - cyberspace
   - data
+  query: ''
   max_results: 10
   extra:
     same_domain_only: true
@@ -140,7 +148,9 @@ sources:
   - ai
   - llm
   - news
+  query: ''
   max_results: 12
+  extra: {}
 - id: openai-news
   name: OpenAI News
   category: ai
@@ -154,7 +164,9 @@ sources:
   - official
   - openai
   - product
+  query: ''
   max_results: 10
+  extra: {}
 - id: anthropic-news
   name: Anthropic News
   category: ai
@@ -168,6 +180,7 @@ sources:
   - official
   - anthropic
   - product
+  query: ''
   max_results: 12
   extra:
     same_domain_only: true
@@ -199,6 +212,7 @@ sources:
   - official
   - deepmind
   - model
+  query: ''
   max_results: 12
   extra:
     same_domain_only: true
@@ -229,6 +243,7 @@ sources:
   - official
   - huggingface
   - opensource
+  query: ''
   max_results: 12
   extra:
     same_domain_only: true
@@ -253,6 +268,7 @@ sources:
   - research
   - opensource
   - paperswithcode
+  query: ''
   max_results: 12
   extra:
     same_domain_only: true
@@ -271,7 +287,9 @@ sources:
   - community
   - llm
   - opensource
+  query: ''
   max_results: 8
+  extra: {}
 - id: reddit-machinelearning
   name: Reddit MachineLearning
   category: ai
@@ -284,7 +302,9 @@ sources:
   - ai
   - community
   - research
+  query: ''
   max_results: 8
+  extra: {}
 - id: hackernews-rss
   name: Hacker News Frontpage
   category: ai
@@ -297,7 +317,9 @@ sources:
   - ai
   - community
   - startup
+  query: ''
   max_results: 10
+  extra: {}
 - id: arxiv-cs-ai
   name: arXiv CS.AI
   category: ai
@@ -344,6 +366,7 @@ sources:
   - wechat
   - supplement
   - media
+  query: ''
   max_results: 5
   extra:
     allow_keywords:
@@ -378,6 +401,7 @@ sources:
   - wechat
   - supplement
   - media
+  query: ''
   max_results: 5
   extra:
     allow_keywords:
@@ -412,6 +436,7 @@ sources:
   - wechat
   - supplement
   - media
+  query: ''
   max_results: 5
   extra:
     allow_keywords:
@@ -446,6 +471,7 @@ sources:
   - wechat
   - supplement
   - research
+  query: ''
   max_results: 5
   extra:
     allow_keywords:
@@ -480,6 +506,7 @@ sources:
   - wechat
   - supplement
   - tutorial
+  query: ''
   max_results: 4
   extra:
     allow_keywords:
@@ -514,6 +541,7 @@ sources:
   - supplement
   - security
   - data
+  query: ''
   max_results: 4
   extra:
     allow_keywords:
@@ -552,6 +580,7 @@ sources:
   - supplement
   - security
   - industry
+  query: ''
   max_results: 4
   extra:
     allow_keywords:

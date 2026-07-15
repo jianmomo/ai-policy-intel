@@ -15,7 +15,7 @@ from app.config import settings
 from app.db.base import SessionLocal
 from app.db.init_db import init_db
 from app.db.models import Item, RunLog, Source
-from app.delivery.emailer import send_digest_via_email, send_ops_alert, send_split_telegram_digests
+from app.delivery.emailer import prepare_delivery_items, send_digest_via_email, send_ops_alert, send_split_telegram_digests
 from app.digest.generator import render_digest, render_oss_radar
 from app.policy_lifecycle import apply_policy_lifecycle, link_superseded_policies, refresh_policy_lifecycle
 from app.scoring.engine import ScoreEngine
@@ -95,45 +95,16 @@ def _run_message(collected_count: int, unique_count: int, inserted_count: int, d
 
 
 def _health_alert_lines(session, definitions: list[SourceDefinition], warnings: list[str]) -> list[str]:
-    lines: list[str] = []
-    if warnings:
-        lines.append(f'异常来源 {len(warnings)} 个:')
-        lines.extend([f'? {warning[:180]}' for warning in warnings[:6]])
-
-    stale_cutoff = datetime.utcnow() - timedelta(days=settings.collector_stale_days)
-    source_rows = session.execute(select(Source)).scalars().all()
-    item_rows = session.execute(select(Item)).scalars().all()
-    latest_by_source: dict[str, datetime] = {}
-    for item in item_rows:
-        latest = item.fetched_at or item.published_at
-        if latest is None:
-            continue
-        current = latest_by_source.get(item.source_id)
-        if current is None or latest > current:
-            latest_by_source[item.source_id] = latest
-
-    stale_sources: list[str] = []
-    empty_sources: list[str] = []
-    for source in source_rows:
-        if not source.enabled:
-            continue
-        latest = latest_by_source.get(source.id)
-        if latest is None:
-            empty_sources.append(source.name)
-        elif latest < stale_cutoff:
-            stale_sources.append(f'{source.name}({latest.strftime("%Y-%m-%d %H:%M")})')
-
-    if stale_sources:
-        lines.append(f'静默来源 {len(stale_sources)} 个:')
-        lines.extend([f'? {value}' for value in stale_sources[:8]])
-    if empty_sources:
-        lines.append(f'未沉淀数据来源 {len(empty_sources)} 个:')
-        lines.extend([f'? {value}' for value in empty_sources[:8]])
-
-    if not lines:
+    """Only notify on collection failures; an idle source is not a failed source."""
+    if not warnings:
         return []
-    lines.insert(0, f'时间: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}')
-    lines.insert(1, f'已启用来源: {len([d for d in definitions if d.enabled])}')
+    enabled_count = len([definition for definition in definitions if definition.enabled])
+    lines = [
+        f"\u68c0\u67e5\u65f6\u95f4: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}",
+        f"\u5df2\u542f\u7528\u4fe1\u606f\u6e90: {enabled_count}",
+        f"\u91c7\u96c6\u5f02\u5e38 {len(warnings)} \u9879:",
+    ]
+    lines.extend([f"\u2022 {warning[:180]}" for warning in warnings[:6]])
     return lines
 
 
@@ -192,6 +163,24 @@ def _policy_backlog_counts(session, window_days: int = 30, stale_days: int = 14)
     }
 
 
+def _send_daily_delivery(session, output_path: Path, new_items: list[Item]) -> list[str]:
+    if not new_items:
+        return ['delivery skipped: no new items']
+    return [
+        send_digest_via_email(output_path, 'Daily AI and Policy Digest'),
+        *send_split_telegram_digests(session, daily=True, items=new_items),
+    ]
+
+
+def _send_weekly_delivery(session, weekly_path: Path, weekly_items: list[Item]) -> list[str]:
+    if not weekly_items:
+        return ['delivery skipped: no new items in last 7 days']
+    return [
+        send_digest_via_email(weekly_path, 'Weekly AI and Policy Digest'),
+        *send_split_telegram_digests(session, daily=False, items=weekly_items),
+    ]
+
+
 def run_daily() -> Path:
     init_db()
     definitions = load_source_definitions(settings.config_dir / 'sources.yaml')
@@ -209,6 +198,7 @@ def run_daily() -> Path:
         sync_sources(session, definitions)
         existing_rows = session.execute(select(Item).order_by(Item.fetched_at.desc()).limit(4000)).scalars().all()
         signatures = _stored_signatures(existing_rows)
+        new_item_ids: list[int] = []
         for item in unique_items:
             classification = classifier.classify(item)
             source_definition = definition_map[item.source_id]
@@ -238,6 +228,7 @@ def run_daily() -> Path:
             session.flush()
             link_superseded_policies(session, db_item)
             _append_signature(signatures, db_item)
+            new_item_ids.append(db_item.id)
             inserted_count += 1
 
         _refresh_policy_relations(session)
@@ -257,11 +248,12 @@ def run_daily() -> Path:
             )
         )
         session.commit()
-        render_digest(session, output_path, 'Daily AI and Policy Digest', limit=20)
-        daily_delivery = [
-            send_digest_via_email(output_path, 'Daily AI and Policy Digest'),
-            *send_split_telegram_digests(session, daily=True),
-        ]
+        new_items = []
+        if new_item_ids:
+            new_items = session.execute(select(Item).where(Item.id.in_(new_item_ids)).order_by(Item.score.desc(), Item.fetched_at.desc())).scalars().all()
+        delivery_items = prepare_delivery_items(new_items)
+        render_digest(session, output_path, 'Daily AI and Policy Digest', limit=20, items=delivery_items)
+        daily_delivery = _send_daily_delivery(session, output_path, delivery_items)
         session.add(RunLog(run_type='daily-delivery', status='success', message='; '.join(daily_delivery)))
         alert_notice = send_ops_alert(_health_alert_lines(session, definitions, warnings))
         session.add(RunLog(run_type='daily-ops', status='success', message=alert_notice))
@@ -273,16 +265,16 @@ def run_weekly() -> tuple[Path, Path]:
     init_db()
     weekly_path = settings.digest_dir / 'weekly_digest.md'
     radar_path = settings.digest_dir / 'oss_radar.md'
+    weekly_cutoff = datetime.utcnow() - timedelta(days=7)
     with SessionLocal() as session:
         seed_default_oss_projects(session)
         _refresh_policy_relations(session)
         snapshot_stats = snapshot_topic_clusters(session)
-        render_digest(session, weekly_path, 'Weekly AI and Policy Digest', limit=50)
+        weekly_items = session.execute(select(Item).where(Item.fetched_at >= weekly_cutoff).order_by(Item.score.desc(), Item.fetched_at.desc()).limit(200)).scalars().all()
+        delivery_items = prepare_delivery_items(weekly_items)
+        render_digest(session, weekly_path, 'Weekly AI and Policy Digest', limit=50, items=delivery_items)
         render_oss_radar(session, radar_path)
-        weekly_delivery = [
-            send_digest_via_email(weekly_path, 'Weekly AI and Policy Digest'),
-            *send_split_telegram_digests(session, daily=False),
-        ]
+        weekly_delivery = _send_weekly_delivery(session, weekly_path, delivery_items)
         session.add(RunLog(run_type='weekly', status='success', message='; '.join(['generated weekly artifacts', f'topic_snapshots={snapshot_stats["rows"]}', *weekly_delivery])))
         session.commit()
     return weekly_path, radar_path
