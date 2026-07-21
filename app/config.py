@@ -1,7 +1,24 @@
+import os
 from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _credential(name: str) -> str:
+    directory = os.getenv("CREDENTIALS_DIRECTORY", "").strip()
+    if not directory:
+        return ""
+    try:
+        path = Path(directory) / "policy-db.env"
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.lstrip().startswith("#"):
+                key, value = line.split("=", 1)
+                if key.strip() == name:
+                    return value.strip()
+    except OSError:
+        pass
+    return ""
 
 
 class Settings(BaseSettings):
@@ -11,7 +28,7 @@ class Settings(BaseSettings):
     app_port: int = 8000
     app_base_url: str = 'http://localhost:8000'
     app_timezone: str = 'Asia/Hong_Kong'
-    database_url: str = 'sqlite:///./data/app.db'
+    database_url: str = _credential("DATABASE_URL") or 'sqlite:///./data/app.db'
     data_dir: Path = Field(default=Path('./data'))
     config_dir: Path = Field(default=Path('./configs'))
     digest_dir: Path = Field(default=Path('./data/digests'))

@@ -12,3 +12,4 @@ python-dateutil==2.9.0.post0
 pytest==8.4.1
 deep-translator==1.11.4
 python-multipart==0.0.32
+psycopg[binary]==3.3.4
