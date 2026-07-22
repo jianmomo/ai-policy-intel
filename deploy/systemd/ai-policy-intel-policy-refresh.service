@@ -9,4 +9,5 @@ WorkingDirectory=__PROJECT_DIR__
 Environment=PYTHONUNBUFFERED=1
 Environment=TZ=Asia/Hong_Kong
 EnvironmentFile=-__PROJECT_DIR__/.env
+LoadCredential=policy-db.env:/data/platform/secrets/policy-db.env
 ExecStart=__PROJECT_DIR__/.venv/bin/python scripts/run_policy_refresh.py

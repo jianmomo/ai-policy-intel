@@ -9,6 +9,7 @@ WorkingDirectory=__PROJECT_DIR__
 Environment=PYTHONUNBUFFERED=1
 Environment=TZ=Asia/Hong_Kong
 EnvironmentFile=-__PROJECT_DIR__/.env
+LoadCredential=policy-db.env:/data/platform/secrets/policy-db.env
 ExecStart=__PROJECT_DIR__/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=5

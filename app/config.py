@@ -69,6 +69,9 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+managed_database_url = _credential("DATABASE_URL")
+if managed_database_url:
+    settings.database_url = managed_database_url
 settings.data_dir.mkdir(parents=True, exist_ok=True)
 settings.digest_dir.mkdir(parents=True, exist_ok=True)
 settings.backup_dir.mkdir(parents=True, exist_ok=True)
