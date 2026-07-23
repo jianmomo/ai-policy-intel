@@ -1,6 +1,7 @@
 import html
 import re
 import smtplib
+import time
 from collections import Counter
 from datetime import datetime
 from email.message import EmailMessage
@@ -686,18 +687,24 @@ def _resolve_ops_chat_id() -> str:
 
 
 def _send_telegram_message(chat_id: str, text: str) -> None:
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-        "disable_web_page_preview": True,
-        "parse_mode": "HTML",
-    }
-    response = httpx.post(
-        f"https://api.telegram.org/bot{settings.telegram_bot_token}/sendMessage",
-        json=payload,
-        timeout=40.0,
-    )
-    response.raise_for_status()
+    for attempt in range(3):
+        try:
+            response = httpx.post(
+                f"https://api.telegram.org/bot{settings.telegram_bot_token}/sendMessage",
+                json={
+                    "chat_id": chat_id,
+                    "text": text,
+                    "disable_web_page_preview": True,
+                    "parse_mode": "HTML",
+                },
+                timeout=40.0,
+            )
+            response.raise_for_status()
+            return
+        except httpx.TransportError:
+            if attempt == 2:
+                raise
+            time.sleep((2, 5)[attempt])
 
 
 def send_split_telegram_digests(session: Session, daily: bool = True, items: list[Item] | None = None) -> list[str]:

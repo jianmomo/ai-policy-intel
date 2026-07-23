@@ -26,6 +26,9 @@ from app.utils.dedup import deduplicate_items, items_look_duplicate
 from app.utils.normalize import item_hash, normalize_item, normalize_url
 
 
+DAILY_WARNING_STATUS = 'partial'
+
+
 def _collector_for(source_type: str):
     mapping = {
         'rss': RSSCollector(),
@@ -236,7 +239,7 @@ def run_daily() -> Path:
         session.add(
             RunLog(
                 run_type='daily',
-                status='success' if not warnings else 'warning',
+                status='success' if not warnings else DAILY_WARNING_STATUS,
                 message=_run_message(
                     len(collected_pairs),
                     len(unique_items),

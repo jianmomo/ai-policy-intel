@@ -1467,7 +1467,7 @@ def _audit_rows(lang: str, admin_token: str) -> dict[str, object]:
                 'status': row.status,
                 'created_at': row.created_at,
                 'message': row.message or '',
-                'tone': 'good' if row.status == 'success' else 'warning' if row.status == 'warning' else 'neutral',
+                'tone': 'good' if row.status == 'success' else 'warning' if row.status in {'warning', 'partial'} else 'neutral',
             }
             for row in rows
         ],

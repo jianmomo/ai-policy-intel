@@ -1,7 +1,7 @@
 [Unit]
 Description=AI Policy Intel Daily Digest Job
-Wants=network-online.target
-After=network-online.target
+Wants=network-online.target warp-ipv4-egress.service
+After=network-online.target warp-ipv4-egress.service
 
 [Service]
 Type=oneshot
@@ -11,3 +11,7 @@ Environment=TZ=Asia/Hong_Kong
 EnvironmentFile=-__PROJECT_DIR__/.env
 LoadCredential=policy-db.env:/data/platform/secrets/policy-db.env
 ExecStart=__PROJECT_DIR__/.venv/bin/python scripts/run_daily.py
+Environment=ALL_PROXY=socks5h://127.0.0.1:40000
+Environment=HTTPS_PROXY=socks5h://127.0.0.1:40000
+Environment=HTTP_PROXY=socks5h://127.0.0.1:40000
+Environment=NO_PROXY=127.0.0.1,localhost,::1

@@ -4,8 +4,8 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 
 from app.db.base import SessionLocal
-from app.db.models import Item, Source
-from app.main import app
+from app.db.models import Item, RunLog, Source
+from app.main import _audit_rows, app
 
 client = TestClient(app)
 
@@ -182,6 +182,17 @@ def test_admin_runs_route_local_access() -> None:
     assert response.status_code == 200
     assert 'Run Audit | AI Policy Intel' in response.text
     assert 'Backup Archives' in response.text
+
+
+def test_admin_runs_partial_status_uses_warning_tone() -> None:
+    with SessionLocal() as session:
+        session.add(RunLog(run_type='daily', status='partial', message='collector warning'))
+        session.commit()
+
+    result = _audit_rows('en', '')
+
+    assert result['runs'][0]['status'] == 'partial'
+    assert result['runs'][0]['tone'] == 'warning'
 
 
 
